@@ -67,7 +67,7 @@ setup(
     author=p_author,
     author_email=p_email,
     url=p_url,
-    description=p_name + " APIs",
+    description="Simple MYSQL client Apis",
 
     # Version, format : Major.Minor.Revision
     version=p_version,
