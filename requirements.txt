@@ -1,0 +1,9 @@
+# gevent stack
+greenlet
+gevent
+
+# pysol
+pysol_base
+
+# Mysql
+pymysql
