@@ -27,9 +27,9 @@
 import logging
 import unittest
 
-from pysol_base.SolBase import SolBase
+from pysolbase.SolBase import SolBase
 
-from pysol_mysql.Mysql.MysqlApi import MysqlApi
+from pysolmysql.Mysql.MysqlApi import MysqlApi
 
 logger = logging.getLogger(__name__)
 SolBase.voodoo_init()

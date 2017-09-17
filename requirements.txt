@@ -3,7 +3,7 @@ greenlet
 gevent
 
 # pysol
-pysol_base
+pysolbase
 
 # Mysql
 pymysql

@@ -1,11 +1,11 @@
-pysol_mysql
+pysolmysql
 ============
 
 Welcome to pysol
 
 Copyright (C) 2013/2017 Laurent Labatut / Laurent Champagnac
 
-pysol_mysql is a set of simple MYSQL client Apis
+pysolmysql is a set of simple MYSQL client Apis
 
 They are gevent based.
 They rely on pymsql.
