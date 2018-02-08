@@ -233,4 +233,4 @@ class MysqlApi(object):
 
         with closing(MysqlApi._get_connection(conf_dict)) as cnx:
             with closing(cnx.cursor()) as cur:
-                cur.execute(statement)
+                cur.executemany(statement, ())
