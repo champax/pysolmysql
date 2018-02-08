@@ -166,6 +166,7 @@ class MysqlApi(object):
         """
         Execute a sql statement, returning 1 row.
         Method will fail if 1 row is not returned.
+        :rtype: object
         :param conf_dict: configuration dict
         :type conf_dict: dict
         :param statement: statement to execute
@@ -223,14 +224,15 @@ class MysqlApi(object):
                     return rows[0]
 
     @classmethod
-    def multi_n(cls, conf_dict, statement):
+    def multi_n(cls, conf_dict, ar_statement):
         """
         Execute multiple sql statement, reading nothing from mysql.
         :type conf_dict: dict
-        :param statement: statements to execute (for instance, batch of insert or whatever)
-        :type statement: str
+        :param ar_statement: list of statements to execute (for instance, batch of insert or whatever)
+        :type ar_statement: list
         """
 
         with closing(MysqlApi._get_connection(conf_dict)) as cnx:
             with closing(cnx.cursor()) as cur:
-                cur.executemany(statement, ())
+                for s in ar_statement:
+                    cur.execute(s)
