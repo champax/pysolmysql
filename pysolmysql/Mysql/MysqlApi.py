@@ -155,7 +155,7 @@ class MysqlApi(object):
                 rows = cur.fetchall()
                 for row in rows:
                     logger.debug("row=%s", row)
-                    for k, v in row.iteritems():
+                    for k, v in row.items():
                         logger.debug("k=%s, %s, %s", k, type(v), v)
                         if fix_types:
                             row[k] = MysqlApi._fix_type(v)
@@ -183,7 +183,7 @@ class MysqlApi(object):
                 rows = cur.fetchall()
                 for row in rows:
                     logger.debug("row=%s", row)
-                    for k, v in row.iteritems():
+                    for k, v in row.items():
                         logger.debug("k=%s, %s, %s", k, type(v), v)
                         if fix_types:
                             row[k] = MysqlApi._fix_type(v)
@@ -212,7 +212,7 @@ class MysqlApi(object):
                 rows = cur.fetchall()
                 for row in rows:
                     logger.debug("row=%s", row)
-                    for k, v in row.iteritems():
+                    for k, v in row.items():
                         logger.debug("k=%s, %s, %s", k, type(v), v)
                         if fix_types:
                             row[k] = MysqlApi._fix_type(v)
