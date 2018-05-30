@@ -3,8 +3,7 @@ greenlet
 gevent
 
 # pysol
-# pysolbase
-git+https://github.com/champax/pysolbase.git@py3#egg=pysolbase
+pysolbase
 
 # Mysql
 pymysql
