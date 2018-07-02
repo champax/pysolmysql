@@ -1,5 +1,5 @@
-"""
 # -*- coding: utf-8 -*-
+"""
 # ===============================================================================
 #
 # Copyright (C) 2013/2017 Laurent Labatut / Laurent Champagnac
@@ -68,11 +68,11 @@ class TestMysqlApi(unittest.TestCase):
 
         # exec_n
         try:
-            ar = MysqlApi.exec_n(d_conf_root, "DROP DATABASE pysolmysql_test;")
+            ar = MysqlApi.exec_n(d_conf_root, "DROP DATABASE IF EXISTS pysolmysql_test;")
             logger.info("ar=%s", ar)
         except Exception as e:
             logger.debug("Ex=%s", SolBase.extostr(e))
-        MysqlApi.exec_n(d_conf_root, "CREATE DATABASE pysolmysql_test;")
+        MysqlApi.exec_n(d_conf_root, "CREATE DATABASE IF NOT EXISTS pysolmysql_test;")
 
     # noinspection PyPep8Naming
     def tearDown(self):
@@ -141,6 +141,43 @@ class TestMysqlApi(unittest.TestCase):
             self.fail("Must fail, bad db with explicit")
         except Exception:
             pass
+
+    def test_mysql_api_with_utf8(self):
+        """
+        Test
+        """
+
+        d_conf = {
+            "host": "localhost",
+            "port": 3306,
+            "database": "pysolmysql_test",
+            "user": "root",
+            "password": "root",
+            "autocommit": True,
+        }
+
+        # exec_0
+        table_statement = """CREATE TABLE `ut_t1` (
+            `string` VARCHAR(255) NOT NULL
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+            """
+        drop_table = """DROP TABLE IF EXISTS ut_t1"""
+        check_table_statement = """SELECT * FROM information_schema.tables
+            WHERE table_schema = '%s'
+            AND table_name = 'ut_t1'
+            LIMIT 1;""" % d_conf['database']
+
+        d = MysqlApi.exec_n(d_conf, drop_table)
+        logger.info("d=%s", d)
+        d = MysqlApi.exec_n(d_conf, table_statement)
+        logger.info("d=%s", d)
+
+        for v in ['tamer', u'string_utf8_Ř']:
+            d = MysqlApi.exec_0(d_conf, "INSERT INTO ut_t1 set string = '%s'" % v)
+            logger.info("d=%s", d)
+            d = MysqlApi.exec_1(d_conf, """select * from ut_t1 where string = '%s'""" % v, fix_types=True)
+            logger.info("string=%s", d['string'].decode('utf-8'))
+            self.assertEqual(v, d['string'].decode('utf-8'))
 
     def test_mysql_api(self):
         """
