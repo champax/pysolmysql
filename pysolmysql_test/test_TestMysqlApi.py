@@ -32,6 +32,7 @@ from pysolmysql.Mysql.MysqlApi import MysqlApi
 
 logger = logging.getLogger(__name__)
 SolBase.voodoo_init()
+SolBase.logging_init(log_level='DEBUG', force_reset=True)
 
 
 # noinspection PyBroadException
@@ -162,10 +163,6 @@ class TestMysqlApi(unittest.TestCase):
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
             """
         drop_table = """DROP TABLE IF EXISTS ut_t1"""
-        check_table_statement = """SELECT * FROM information_schema.tables
-            WHERE table_schema = '%s'
-            AND table_name = 'ut_t1'
-            LIMIT 1;""" % d_conf['database']
 
         d = MysqlApi.exec_n(d_conf, drop_table)
         logger.info("d=%s", d)
