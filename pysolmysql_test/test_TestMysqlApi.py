@@ -173,8 +173,8 @@ class TestMysqlApi(unittest.TestCase):
             d = MysqlApi.exec_0(d_conf, "INSERT INTO ut_t1 set string = '%s'" % v)
             logger.info("d=%s", d)
             d = MysqlApi.exec_1(d_conf, """select * from ut_t1 where string = '%s'""" % v, fix_types=True)
-            logger.info("string=%s", d['string'].decode('utf-8'))
-            self.assertEqual(v, d['string'].decode('utf-8'))
+            logger.info("Got d=%s", d)            
+            self.assertEqual(v, d['string'])
 
     def test_mysql_api(self):
         """

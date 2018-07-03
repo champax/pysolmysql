@@ -45,6 +45,7 @@ class MysqlApi(object):
         "user": "your_account",
         "password": "your_password",
         "autocommit": True,
+        "encoding": "utf8",
     }
 
     @classmethod
@@ -69,10 +70,11 @@ class MysqlApi(object):
         #          max_allowed_packet=16*1024*1024, defer_connect=False,
         #          auth_plugin_map={}):
 
-        logger.debug("mysql connect, server=%s:%s, unix=%s, user=%s, pwd=%s, db=%s",
+        logger.debug("mysql connect, server=%s:%s, unix=%s, user=%s, pwd=%s, db=%s, enc=%s",
                      conf_dict.get("host"), conf_dict.get("port"), conf_dict.get("unix"),
                      conf_dict.get("user"), conf_dict.get("password"),
-                     conf_dict.get("database")
+                     conf_dict.get("database"),
+                     conf_dict.get("encoding", "utf8")
                      )
 
         # Host
@@ -88,6 +90,8 @@ class MysqlApi(object):
                 password=conf_dict["password"],
 
                 autocommit=conf_dict["autocommit"],
+
+                charset=conf_dict.get("encoding", "utf8"),
 
                 cursorclass=pymysql.cursors.DictCursor
             )
