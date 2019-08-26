@@ -32,10 +32,10 @@ from pysolmysql.Mysql.MysqlApi import MysqlApi
 
 logger = logging.getLogger(__name__)
 SolBase.voodoo_init()
-SolBase.logging_init(log_level='DEBUG', force_reset=True)
+SolBase.logging_init(log_level='INFO', force_reset=True)
 
 
-# noinspection PyBroadException
+# noinspection PyBroadException,SqlNoDataSourceInspection,SqlResolve
 class TestMysqlApi(unittest.TestCase):
     """
     Test description
@@ -173,7 +173,8 @@ class TestMysqlApi(unittest.TestCase):
             d = MysqlApi.exec_0(d_conf, "INSERT INTO ut_t1 set string = '%s'" % v)
             logger.info("d=%s", d)
             d = MysqlApi.exec_1(d_conf, """select * from ut_t1 where string = '%s'""" % v, fix_types=True)
-            logger.info("Got d=%s", d)            
+            logger.info("Got d=%s", d)
+            # noinspection PyUnresolvedReferences
             self.assertEqual(v, d['string'])
 
     def test_mysql_api(self):
