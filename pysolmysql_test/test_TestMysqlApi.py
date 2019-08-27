@@ -290,7 +290,80 @@ class TestMysqlApi(unittest.TestCase):
         logger.info("d=%s", d)
         self.assertIsNone(d)
 
-    def test_pool_basic(self):
+    def test_pool_basic_host_single(self):
+        """
+        Test pool, basic
+        """
+
+        MysqlApi.reset_pools()
+        Meters.reset()
+
+        d_conf = {
+            "host": "localhost",
+            "port": 3306,
+            "database": None,
+            "user": "root",
+            "password": "root",
+            "autocommit": True,
+        }
+
+        for _ in range(0, 10):
+            MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
+
+        # Check it
+        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+
+        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 10)
+        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 10)
+
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10)
+
+        s_hash = MysqlApi._get_pool_hash(d_conf)
+        self.assertEquals(len(MysqlApi.D_POOL_INSTANCES[s_hash].host_status), 1)
+        self.assertIn("localhost", MysqlApi.D_POOL_INSTANCES[s_hash].host_status)
+
+    def test_pool_basic_host_multi(self):
+        """
+        Test pool, basic
+        """
+
+        MysqlApi.reset_pools()
+        Meters.reset()
+
+        d_conf = {
+            "host": "localhost,127.0.0.1",
+            "port": 3306,
+            "database": None,
+            "user": "root",
+            "password": "root",
+            "autocommit": True,
+        }
+
+        for _ in range(0, 10):
+            MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
+
+        # Check it
+        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+
+        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 10)
+        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 10)
+
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
+        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10)
+
+        s_hash = MysqlApi._get_pool_hash(d_conf)
+        self.assertEquals(len(MysqlApi.D_POOL_INSTANCES[s_hash].host_status), 2)
+        self.assertIn("localhost", MysqlApi.D_POOL_INSTANCES[s_hash].host_status)
+        self.assertIn("127.0.0.1", MysqlApi.D_POOL_INSTANCES[s_hash].host_status)
+
+    def test_pool_basic_hosts_array(self):
         """
         Test pool, basic
         """
@@ -321,6 +394,11 @@ class TestMysqlApi(unittest.TestCase):
         self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
         self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
         self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10)
+
+        s_hash = MysqlApi._get_pool_hash(d_conf)
+        self.assertEquals(len(MysqlApi.D_POOL_INSTANCES[s_hash].host_status), 2)
+        self.assertIn("localhost", MysqlApi.D_POOL_INSTANCES[s_hash].host_status)
+        self.assertIn("127.0.0.1", MysqlApi.D_POOL_INSTANCES[s_hash].host_status)
 
     def test_pool_basic_err(self):
         """
