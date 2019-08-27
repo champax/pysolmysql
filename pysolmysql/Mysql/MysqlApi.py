@@ -28,6 +28,7 @@ import logging
 from contextlib import closing
 
 from gevent.threading import Lock
+from pysolmeters.Meters import Meters
 
 from pysolmysql.Pool.mysql_pool import MysqlConnectionPool
 
@@ -44,6 +45,18 @@ class MysqlApi(object):
 
     # Static pool instances (hash from config dict => MysqlConnectionPool)
     D_POOL_INSTANCES = dict()
+
+    @classmethod
+    def reset_pools(cls):
+        """
+        Reset all pools
+        """
+
+        with cls.POOL_LOCK:
+            for s_hash, pool in cls.D_POOL_INSTANCES.items():
+                logger.info("Closing pool, s_hash=%s", s_hash)
+                pool.close_all()
+            cls.D_POOL_INSTANCES = dict()
 
     @classmethod
     def _get_pool_hash(cls, conf_dict):
@@ -77,6 +90,7 @@ class MysqlApi(object):
                 if s_hash not in cls.D_POOL_INSTANCES:
                     cls.D_POOL_INSTANCES[s_hash] = MysqlConnectionPool(conf_dict)
                     logger.info("Allocated pool, s_hash=%s, pool.len=%s", s_hash, len(cls.D_POOL_INSTANCES))
+                    Meters.aii("k.db_pool_hash.cur")
 
         # Over
         return cls.D_POOL_INSTANCES[s_hash]

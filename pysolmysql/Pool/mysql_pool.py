@@ -30,6 +30,7 @@ import struct
 import pymysql
 import time
 from pysolbase.SolBase import SolBase
+from pysolmeters.Meters import Meters
 
 from pysolmysql.Pool.base_pool import DatabaseConnectionPool
 
@@ -85,6 +86,8 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :type conf_dict: dict
         """
 
+        Meters.aii("k.db_pool_mysql.call.__init")
+
         # Base
         super(MysqlConnectionPool, self).__init__(conf_dict)
 
@@ -117,6 +120,8 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :return: pymysql.connections.Connection
         :rtype: pymysql.connections.Connection
         """
+
+        Meters.aii("k.db_pool_mysql.call._get_connection")
 
         # DOC :
         #     def __init__(self, host=None, user=None, password="",
@@ -220,6 +225,8 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :rtype: pymysql.connections.Connection
         """
 
+        Meters.aii("k.db_pool_mysql.call._connection_create")
+
         # ------------------------
         # Try to get a connection
         # ------------------------
@@ -274,6 +281,8 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :rtype bool
         """
 
+        Meters.aii("k.db_pool_mysql.call._connection_ping")
+
         # noinspection PyBroadException
         try:
             conn.ping(reconnect=False)
@@ -290,6 +299,8 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :param conn: pymysql.connections.Connection
         :type conn: pymysql.connections.Connection
         """
+
+        Meters.aii("k.db_pool_mysql.call._connection_close")
 
         # noinspection PyBroadException
         try:

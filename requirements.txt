@@ -4,6 +4,7 @@ gevent
 
 # pysol
 pysolbase
+pysolmeters
 
 # Mysql
 pymysql

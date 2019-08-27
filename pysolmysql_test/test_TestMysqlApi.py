@@ -27,6 +27,7 @@ import logging
 import unittest
 
 from pysolbase.SolBase import SolBase
+from pysolmeters.Meters import Meters
 
 from pysolmysql.Mysql.MysqlApi import MysqlApi
 
@@ -58,6 +59,9 @@ class TestMysqlApi(unittest.TestCase):
         Setup
         """
 
+        MysqlApi.reset_pools()
+        Meters.reset()
+
         d_conf_root = {
             "host": "localhost",
             "port": 3306,
@@ -81,7 +85,9 @@ class TestMysqlApi(unittest.TestCase):
         Setup (called on destroy)
         """
 
-        pass
+        SolBase.logging_init(log_level='DEBUG', force_reset=True)
+        Meters.write_to_logger()
+        SolBase.logging_init(log_level='INFO', force_reset=True)
 
     def test_multi(self):
         """

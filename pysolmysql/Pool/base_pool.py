@@ -24,6 +24,7 @@
 
 import logging
 from gevent import queue
+from pysolmeters.Meters import Meters
 
 logger = logging.getLogger(__name__)
 
@@ -59,22 +60,31 @@ class DatabaseConnectionPool(object):
         :rtype object
         """
 
+        Meters.aii("k.db_pool_base.call.connection_acquire")
+
         if self.size >= self.max_size or self.pool.qsize():
+            # Get from the pool
             conn = self.pool.get()
+
+            # Ping it
             if not self._connection_ping(conn):
-                # noinspection PyBroadException
-                try:
-                    self._connection_close(conn)
-                except Exception:
-                    pass
+                # Failed => close it
+                self._connection_close(conn)
+
+                # Re-create a new one (we just closed a connection)
                 conn = self._connection_create()
+
+            # Send it back
             return conn
         else:
+            # New connection
             self.size += 1
+            Meters.aii("k.db_pool_base.cur_size", increment_value=1)
             try:
                 conn = self._connection_create()
             except Exception:
                 self.size -= 1
+                Meters.aii("k.db_pool_base.cur_size", increment_value=-1)
                 raise
             return conn
 
@@ -85,8 +95,11 @@ class DatabaseConnectionPool(object):
         :type conn: object
         """
 
+        Meters.aii("k.db_pool_base.call.connection_release")
+
         # If none, decrement + return
         if conn is None:
+            Meters.aii("k.db_pool_base.cur_size", increment_value=-1)
             self.size -= 1
             return
 
@@ -101,10 +114,13 @@ class DatabaseConnectionPool(object):
         """
         Close all connections
         """
+        n = 0
         while not self.pool.empty():
             conn = self.pool.get_nowait()
             self._connection_close(conn)
+            n += 1
 
+        Meters.aii("k.db_pool_base.cur_size", increment_value=-n)
         self.size = 0
 
     # ------------------------------------------------
