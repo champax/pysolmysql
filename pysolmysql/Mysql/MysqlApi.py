@@ -22,10 +22,15 @@
 # ===============================================================================
 """
 
-from contextlib import closing
+# noinspection PyUnresolvedReferences
+import ujson
 import logging
+from contextlib import closing
 
-import pymysql
+from gevent.threading import Lock
+from pysolmeters.Meters import Meters
+
+from pysolmysql.Pool.mysql_pool import MysqlConnectionPool
 
 logger = logging.getLogger(__name__)
 
@@ -35,84 +40,60 @@ class MysqlApi(object):
     Mysql Api
     """
 
-    # "unix" or "host" (not both), "host" has precedence
+    # Lock
+    POOL_LOCK = Lock()
 
-    SAMPLE_CONFIG_DICT = {
-        "host": "127.0.0.1",
-        "unix": "/var/run/mysqld/mysqld.sock",
-        "port": 3306,
-        "database": "mysql",
-        "user": "your_account",
-        "password": "your_password",
-        "autocommit": True,
-        "encoding": "utf8",
-    }
+    # Static pool instances (hash from config dict => MysqlConnectionPool)
+    D_POOL_INSTANCES = dict()
 
     @classmethod
-    def _get_connection(cls, conf_dict):
+    def reset_pools(cls):
         """
-        Get a connection
+        Reset all pools
+        """
+
+        with cls.POOL_LOCK:
+            for s_hash, pool in cls.D_POOL_INSTANCES.items():
+                logger.info("Closing pool, s_hash=%s", s_hash)
+                pool.close_all()
+            cls.D_POOL_INSTANCES = dict()
+
+    @classmethod
+    def _get_pool_hash(cls, conf_dict):
+        """
+        Get pool hash
         :param conf_dict: dict
         :type conf_dict: dict
-        :return: pymysql.connections.Connection
-        :rtype: pymysql.connections.Connection
+        :return: str
+        :rtype: str
         """
 
-        # DOC :
-        #     def __init__(self, host=None, user=None, password="",
-        #          database=None, port=3306, unix_socket=None,
-        #          charset='', sql_mode=None,
-        #          read_default_file=None, conv=decoders, use_unicode=None,
-        #          client_flag=0, cursorclass=Cursor, init_command=None,
-        #          connect_timeout=None, ssl=None, read_default_group=None,
-        #          compress=None, named_pipe=None, no_delay=None,
-        #          autocommit=False, db=None, passwd=None, local_infile=False,
-        #          max_allowed_packet=16*1024*1024, defer_connect=False,
-        #          auth_plugin_map={}):
+        s_hash = str(hash(ujson.dumps(conf_dict, sort_keys=True)))
+        return s_hash
 
-        logger.debug("mysql connect, server=%s:%s, unix=%s, user=%s, pwd=%s, db=%s, enc=%s",
-                     conf_dict.get("host"), conf_dict.get("port"), conf_dict.get("unix"),
-                     conf_dict.get("user"), conf_dict.get("password"),
-                     conf_dict.get("database"),
-                     conf_dict.get("encoding", "utf8")
-                     )
+    @classmethod
+    def _get_pool(cls, conf_dict):
+        """
+        Init static pool
+        :param conf_dict: dict
+        :type conf_dict: dict
+        :return pysolmysql.Pool.mysql_pool.MysqlConnectionPool
+        :rtype pysolmysql.Pool.mysql_pool.MysqlConnectionPool
+        """
 
-        # Host
-        h = conf_dict.get("host")
-        if h:
-            c = pymysql.connect(
-                host=conf_dict["host"],
-                port=int(conf_dict["port"]),
+        # Hash
+        s_hash = cls._get_pool_hash(conf_dict)
 
-                db=conf_dict["database"],
+        # Alloc if needed
+        if s_hash not in cls.D_POOL_INSTANCES:
+            with cls.POOL_LOCK:
+                if s_hash not in cls.D_POOL_INSTANCES:
+                    cls.D_POOL_INSTANCES[s_hash] = MysqlConnectionPool(conf_dict)
+                    logger.info("Allocated pool, s_hash=%s, pool.len=%s", s_hash, len(cls.D_POOL_INSTANCES))
+                    Meters.aii("k.db_pool.hash.cur")
 
-                user=conf_dict["user"],
-                password=conf_dict["password"],
-
-                autocommit=conf_dict["autocommit"],
-
-                charset=conf_dict.get("encoding", "utf8"),
-
-                cursorclass=pymysql.cursors.DictCursor
-            )
-            return c
-
-        # Unix
-        h = conf_dict.get("unix")
-        if h:
-            c = pymysql.connect(
-                unix_socket=conf_dict["unix"],
-
-                db=conf_dict["database"],
-
-                user=conf_dict["user"],
-                password=conf_dict["password"],
-
-                autocommit=conf_dict["autocommit"],
-
-                cursorclass=pymysql.cursors.DictCursor
-            )
-            return c
+        # Over
+        return cls.D_POOL_INSTANCES[s_hash]
 
     @classmethod
     def _fix_type(cls, data):
@@ -135,9 +116,13 @@ class MysqlApi(object):
         :type statement: str
         """
 
-        with closing(MysqlApi._get_connection(conf_dict)) as cnx:
+        cnx = None
+        try:
+            cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 cur.execute(statement)
+        finally:
+            cls._get_pool(conf_dict).connection_release(cnx)
 
     @classmethod
     def exec_n(cls, conf_dict, statement, fix_types=True):
@@ -153,7 +138,9 @@ class MysqlApi(object):
         :rtype list
         """
 
-        with closing(MysqlApi._get_connection(conf_dict)) as cnx:
+        cnx = None
+        try:
+            cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 cur.execute(statement)
                 rows = cur.fetchall()
@@ -164,6 +151,8 @@ class MysqlApi(object):
                         if fix_types:
                             row[k] = MysqlApi._fix_type(v)
                 return rows
+        finally:
+            cls._get_pool(conf_dict).connection_release(cnx)
 
     @classmethod
     def exec_1(cls, conf_dict, statement, fix_types=True):
@@ -181,7 +170,9 @@ class MysqlApi(object):
         :rtype dict
         """
 
-        with closing(MysqlApi._get_connection(conf_dict)) as cnx:
+        cnx = None
+        try:
+            cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 cur.execute(statement)
                 rows = cur.fetchall()
@@ -194,6 +185,8 @@ class MysqlApi(object):
                 if len(rows) != 1:
                     raise Exception("Invalid row len, expecting 1, having={0}".format(len(rows)))
                 return rows[0]
+        finally:
+            cls._get_pool(conf_dict).connection_release(cnx)
 
     @classmethod
     def exec_01(cls, conf_dict, statement, fix_types=True):
@@ -210,7 +203,9 @@ class MysqlApi(object):
         :rtype dict, None
         """
 
-        with closing(MysqlApi._get_connection(conf_dict)) as cnx:
+        cnx = None
+        try:
+            cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 cur.execute(statement)
                 rows = cur.fetchall()
@@ -226,6 +221,8 @@ class MysqlApi(object):
                     raise Exception("Invalid row len, expecting 1, having={0}".format(len(rows)))
                 else:
                     return rows[0]
+        finally:
+            cls._get_pool(conf_dict).connection_release(cnx)
 
     @classmethod
     def multi_n(cls, conf_dict, ar_statement):
@@ -236,7 +233,11 @@ class MysqlApi(object):
         :type ar_statement: list
         """
 
-        with closing(MysqlApi._get_connection(conf_dict)) as cnx:
+        cnx = None
+        try:
+            cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 for s in ar_statement:
                     cur.execute(s)
+        finally:
+            cls._get_pool(conf_dict).connection_release(cnx)
