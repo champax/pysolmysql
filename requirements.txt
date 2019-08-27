@@ -9,5 +9,5 @@ pysolmeters
 # Mysql
 pymysql
 
-# ujson$
+# ujson
 ujson
