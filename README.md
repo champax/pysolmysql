@@ -55,7 +55,7 @@ Possible backward compatibility issue:
 Multiple hosts
 ===============
 
-Multiple hosts can be adressed in an active/active manner.
+Multiple hosts can be addressed in an active/active manner.
 
 Several hosts can be specified using :
 - "hosts" list (preferred)
