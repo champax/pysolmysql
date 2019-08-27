@@ -29,8 +29,6 @@ import struct
 
 import pymysql
 import time
-from gevent.threading import Lock
-from pymysql import InternalError, DatabaseError
 from pysolbase.SolBase import SolBase
 
 from pysolmysql.Pool.base_pool import DatabaseConnectionPool
@@ -40,17 +38,11 @@ logger = logging.getLogger(__name__)
 # Init random
 random.seed(a=struct.unpack('i', os.urandom(4)))
 
-# Host status (host name => int)
-HOSTS_STATUS = dict()
-
 
 class MysqlConnectionPool(DatabaseConnectionPool):
     """
     Mysql connection pool
     """
-
-    # Pool lock
-    LOCK = Lock()
 
     # Public sample config dict
     # FOR : pysolmysql.Pool.mysql_pool.MysqlConnectionPool#create_connection
@@ -92,7 +84,25 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :param conf_dict: dict
         :type conf_dict: dict
         """
+
+        # Base
         super(MysqlConnectionPool, self).__init__(conf_dict)
+
+        # Init us
+        self.host_status = dict()
+
+        # Check
+        if "hosts" not in self.conf_dict and "host" not in self.conf_dict:
+            raise Exception("No host specified")
+
+        # Init, "hosts" first
+        if "hosts" in self.conf_dict:
+            for host in self.conf_dict["hosts"]:
+                self.host_status[host] = 0.0
+        else:
+            logger.warning("Using deprecated entry, prefer using 'hosts', got host=%s", self.conf_dict["host"])
+            for host in self.conf_dict["host"].split(","):
+                self.host_status[host] = 0.0
 
     # ------------------------------------------------
     # HELPERS
@@ -177,15 +187,14 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         # Nothing
         return None
 
-    @classmethod
-    def _get_random_host(cls):
+    def _get_random_host(self):
         """
         Return a host in HOSTS_STATUS where the host is up
         :return str,bool (False)
         :rtype str,bool
         """
         now = time.time()
-        hosts_up = [host for host, prison in HOSTS_STATUS.items() if prison < now]
+        hosts_up = [host for host, prison in self.host_status.items() if prison < now]
         try:
             host = random.choice(hosts_up)
             return host
@@ -212,26 +221,6 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         """
 
         # ------------------------
-        # Init
-        # ------------------------
-
-        if len(HOSTS_STATUS) == 0:
-            with MysqlConnectionPool.LOCK:
-                if len(HOSTS_STATUS) == 0:
-                    # Check
-                    if "hosts" not in self.conf_dict and "host" not in self.conf_dict:
-                        raise Exception("No host specified")
-
-                    # Init, "hosts" first
-                    if "hosts" in self.conf_dict:
-                        for host in self.conf_dict["hosts"]:
-                            HOSTS_STATUS[host] = 0
-                    else:
-                        logger.warning("Using deprecated entry, prefer using 'hosts', got host=%s", self.conf_dict["host"])
-                        for host in self.conf_dict["host"].split(","):
-                            HOSTS_STATUS[host] = 0
-
-        # ------------------------
         # Try to get a connection
         # ------------------------
         out_conn = None
@@ -241,17 +230,17 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
             # Check it
             if not host:
-                raise Exception("No mysql host available, %s are down" % HOSTS_STATUS.keys())
+                raise Exception("No mysql host available, %s are down" % self.host_status.keys())
 
             # This host seems up => try open a connection
             try:
-                # Build the dict
+                # Build the dict for underlying _get_connection
                 d_local = copy.deepcopy(self.conf_dict)
                 if "hosts" in d_local:
                     del d_local["hosts"]
                 d_local["host"] = host
 
-                # Get it
+                # Open it
                 out_conn = self._get_connection(d_local)
 
                 # Ping it (underlying base pool do NOT do it when opening connection)
@@ -263,8 +252,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
                 # Deactivate host
                 logger.error("Host de-activate for 1 minute, host=%s, ex=%s", host, SolBase.extostr(e))
-                HOSTS_STATUS[host] = time.time() + 60
-
+                self.host_status[host] = time.time() + 60.0
                 # Kick connection
                 self._connection_close(out_conn)
 
@@ -307,6 +295,6 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         try:
             if conn:
                 conn.close()
-        except Exception:
+        except Exception as e:
             # Dont care of exception in case of closing
-            pass
+            logger.debug("Close exception (non fatal), ex=%s", SolBase.extostr(e))
