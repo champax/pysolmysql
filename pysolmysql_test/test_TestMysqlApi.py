@@ -311,16 +311,16 @@ class TestMysqlApi(unittest.TestCase):
             MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
 
         # Check it
-        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.hash.cur"), 1)
 
-        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 10)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.base.cur_size"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_release"), 10)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._get_connection"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_ping"), 10)
 
         s_hash = MysqlApi._get_pool_hash(d_conf)
         self.assertEquals(len(MysqlApi.D_POOL_INSTANCES[s_hash].host_status), 1)
@@ -347,16 +347,16 @@ class TestMysqlApi(unittest.TestCase):
             MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
 
         # Check it
-        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.hash.cur"), 1)
 
-        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 10)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.base.cur_size"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_release"), 10)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._get_connection"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_ping"), 10)
 
         s_hash = MysqlApi._get_pool_hash(d_conf)
         self.assertEquals(len(MysqlApi.D_POOL_INSTANCES[s_hash].host_status), 2)
@@ -384,16 +384,16 @@ class TestMysqlApi(unittest.TestCase):
             MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
 
         # Check it
-        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.hash.cur"), 1)
 
-        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 10)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.base.cur_size"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_release"), 10)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._get_connection"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_ping"), 10)
 
         s_hash = MysqlApi._get_pool_hash(d_conf)
         self.assertEquals(len(MysqlApi.D_POOL_INSTANCES[s_hash].host_status), 2)
@@ -427,16 +427,16 @@ class TestMysqlApi(unittest.TestCase):
             logger.debug("Expected ex=%s", SolBase.extostr(e))
 
         # Check it
-        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.hash.cur"), 1)
 
-        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 11)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 11)
+        self.assertEquals(Meters.aig("k.db_pool.base.cur_size"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), 11)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_release"), 11)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 11)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._get_connection"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_ping"), 11)
 
     def test_pool_basic_bad_db(self):
         """
@@ -461,19 +461,19 @@ class TestMysqlApi(unittest.TestCase):
             logger.debug("Expected ex=%s", SolBase.extostr(e))
 
         # Check it
-        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.hash.cur"), 1)
 
-        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 0)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.base.cur_size"), 0)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_release"), 1)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 2)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_close"), 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_create"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._get_connection"), 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_close"), 2)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.hosts.deactivate_one"), 2)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.hosts.all_down"), 1)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.hosts.deactivate_one"), 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.hosts.all_down"), 1)
 
     def test_pool_basic_x2(self):
         """
@@ -508,16 +508,16 @@ class TestMysqlApi(unittest.TestCase):
             MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
 
         # Check it
-        self.assertEquals(Meters.aig("k.db_pool_hash.cur"), 1 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.hash.cur"), 1 * 2)
 
-        self.assertEquals(Meters.aig("k.db_pool_base.cur_size"), 1 * 2)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), 10 * 2)
-        self.assertEquals(Meters.aig("k.db_pool_base.call.connection_release"), 10 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.base.cur_size"), 1 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), 10 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.base.call.connection_release"), 10 * 2)
 
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1 * 2)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_create"), 1 * 2)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._get_connection"), 1 * 2)
-        self.assertEquals(Meters.aig("k.db_pool_mysql.call._connection_ping"), 10 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_create"), 1 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._get_connection"), 1 * 2)
+        self.assertEquals(Meters.aig("k.db_pool.mysql.call._connection_ping"), 10 * 2)
 
     # ============================
     # BENCH
@@ -623,9 +623,9 @@ class TestMysqlApi(unittest.TestCase):
                 # Stat
                 ms = SolBase.msdiff(dt)
                 sec = float(ms / 1000.0)
-                total_acquire = Meters.aig("k.db_pool_base.call.connection_acquire")
+                total_acquire = Meters.aig("k.db_pool.base.call.connection_acquire")
                 per_sec_acquire = round(float(total_acquire) / sec, 2)
-                total_release = Meters.aig("k.db_pool_base.call.connection_release")
+                total_release = Meters.aig("k.db_pool.base.call.connection_release")
                 per_sec_release = round(float(total_release) / sec, 2)
 
                 logger.info("Running..., run=%s, ok=%s, ps.ack/rel=%s/%s", self.thread_running.get(), self.thread_running_ok.get(), per_sec_acquire, per_sec_release)
@@ -645,18 +645,18 @@ class TestMysqlApi(unittest.TestCase):
             g_array = None
 
             # Check it
-            self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), Meters.aig("k.db_pool_base.call.connection_release"))
+            self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), Meters.aig("k.db_pool.base.call.connection_release"))
 
             if check_exception:
-                self.assertEquals(Meters.aig("k.db_pool_base.call.connection_acquire"), Meters.aig("k.db_pool_mysql.call._connection_ping"))
+                self.assertEquals(Meters.aig("k.db_pool.base.call.connection_acquire"), Meters.aig("k.db_pool.mysql.call._connection_ping"))
 
-            self.assertLessEqual(Meters.aig("k.db_pool_mysql.call._get_connection"), pool_max)
-            self.assertLessEqual(Meters.aig("k.db_pool_mysql.call._connection_create"), pool_max)
-            self.assertLessEqual(Meters.aig("k.db_pool_hash.cur"), 1)
-            self.assertLessEqual(Meters.aig("k.db_pool_base.cur_size"), pool_max)
-            self.assertLessEqual(Meters.aig("k.db_pool_base.max_size"), pool_max)
+            self.assertLessEqual(Meters.aig("k.db_pool.mysql.call._get_connection"), pool_max)
+            self.assertLessEqual(Meters.aig("k.db_pool.mysql.call._connection_create"), pool_max)
+            self.assertLessEqual(Meters.aig("k.db_pool.hash.cur"), 1)
+            self.assertLessEqual(Meters.aig("k.db_pool.base.cur_size"), pool_max)
+            self.assertLessEqual(Meters.aig("k.db_pool.base.max_size"), pool_max)
 
-            self.assertEquals(Meters.aig("k.db_pool_mysql.call.__init"), 1)
+            self.assertEquals(Meters.aig("k.db_pool.mysql.call.__init"), 1)
         finally:
             self.run_event.set()
             if g_event:
@@ -688,7 +688,7 @@ class TestMysqlApi(unittest.TestCase):
         """
         self._go_greenlet(greenlet_count=100, pool_max=100, sql="SELECT SLEEP(1);")
 
-        self.assertEquals(Meters.aig("k.db_pool_base.pool_maxed"), 0)
+        self.assertEquals(Meters.aig("k.db_pool.base.pool_maxed"), 0)
 
     def test_bench_greenlet_100_10_maxed_sleep(self):
         """
@@ -698,4 +698,4 @@ class TestMysqlApi(unittest.TestCase):
         self._go_greenlet(greenlet_count=100, pool_max=10, sql="SELECT SLEEP(1);", check_exception=False)
 
         # Must have some maxed
-        self.assertGreater(Meters.aig("k.db_pool_base.pool_maxed"), 0)
+        self.assertGreater(Meters.aig("k.db_pool.base.pool_maxed"), 0)

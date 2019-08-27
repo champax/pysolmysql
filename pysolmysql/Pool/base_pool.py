@@ -66,7 +66,7 @@ class DatabaseConnectionPool(object):
 
         with self.pool_lock:
 
-            Meters.aii("k.db_pool_base.call.connection_acquire")
+            Meters.aii("k.db_pool.base.call.connection_acquire")
 
             if self.pool.qsize() > 0:
                 # ------------------------------
@@ -88,7 +88,7 @@ class DatabaseConnectionPool(object):
                 # ------------------------------
                 # POOL MAXED => ERROR
                 # ------------------------------
-                Meters.aii("k.db_pool_base.pool_maxed")
+                Meters.aii("k.db_pool.base.pool_maxed")
                 raise Exception("Pool maxed")
             else:
                 # ------------------------------
@@ -97,8 +97,8 @@ class DatabaseConnectionPool(object):
                 try:
                     conn = self._connection_create()
                     self.size += 1
-                    Meters.aii("k.db_pool_base.cur_size", increment_value=1)
-                    Meters.ai("k.db_pool_base.max_size").set(max(Meters.aig("k.db_pool_base.max_size"), Meters.aig("k.db_pool_base.cur_size")))
+                    Meters.aii("k.db_pool.base.cur_size", increment_value=1)
+                    Meters.ai("k.db_pool.base.max_size").set(max(Meters.aig("k.db_pool.base.max_size"), Meters.aig("k.db_pool.base.cur_size")))
                 except Exception:
                     raise
                 return conn
@@ -112,7 +112,7 @@ class DatabaseConnectionPool(object):
 
         with self.pool_lock:
 
-            Meters.aii("k.db_pool_base.call.connection_release")
+            Meters.aii("k.db_pool.base.call.connection_release")
 
             # If none, decrement + return
             if conn is None:
@@ -135,8 +135,8 @@ class DatabaseConnectionPool(object):
             self._connection_close(conn)
             n += 1
 
-        Meters.aii("k.db_pool_base.cur_size", increment_value=-n)
-        Meters.ai("k.db_pool_base.max_size").set(max(Meters.aig("k.db_pool_base.max_size"), Meters.aig("k.db_pool_base.cur_size")))
+        Meters.aii("k.db_pool.base.cur_size", increment_value=-n)
+        Meters.ai("k.db_pool.base.max_size").set(max(Meters.aig("k.db_pool.base.max_size"), Meters.aig("k.db_pool.base.cur_size")))
         self.size = 0
 
     # ------------------------------------------------

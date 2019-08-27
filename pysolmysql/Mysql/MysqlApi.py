@@ -90,7 +90,7 @@ class MysqlApi(object):
                 if s_hash not in cls.D_POOL_INSTANCES:
                     cls.D_POOL_INSTANCES[s_hash] = MysqlConnectionPool(conf_dict)
                     logger.info("Allocated pool, s_hash=%s, pool.len=%s", s_hash, len(cls.D_POOL_INSTANCES))
-                    Meters.aii("k.db_pool_hash.cur")
+                    Meters.aii("k.db_pool.hash.cur")
 
         # Over
         return cls.D_POOL_INSTANCES[s_hash]

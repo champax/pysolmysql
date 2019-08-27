@@ -86,7 +86,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :type conf_dict: dict
         """
 
-        Meters.aii("k.db_pool_mysql.call.__init")
+        Meters.aii("k.db_pool.mysql.call.__init")
 
         # Base
         super(MysqlConnectionPool, self).__init__(conf_dict)
@@ -121,7 +121,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :rtype: pymysql.connections.Connection
         """
 
-        Meters.aii("k.db_pool_mysql.call._get_connection")
+        Meters.aii("k.db_pool.mysql.call._get_connection")
 
         # DOC :
         #     def __init__(self, host=None, user=None, password="",
@@ -225,7 +225,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :rtype: pymysql.connections.Connection
         """
 
-        Meters.aii("k.db_pool_mysql.call._connection_create")
+        Meters.aii("k.db_pool.mysql.call._connection_create")
 
         # ------------------------
         # Try to get a connection
@@ -237,7 +237,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
             # Check it
             if not host:
-                Meters.aii("k.db_pool_mysql.hosts.all_down")
+                Meters.aii("k.db_pool.mysql.hosts.all_down")
                 raise Exception("No mysql host available, %s are down" % self.host_status.keys())
 
             # This host seems up => try open a connection
@@ -259,7 +259,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
                 # - We disable the host for ALL errors (even if DatabaseError can be raised when database do not exists but when the server is up...)
 
                 # Deactivate host
-                Meters.aii("k.db_pool_mysql.hosts.deactivate_one")
+                Meters.aii("k.db_pool.mysql.hosts.deactivate_one")
                 logger.error("Host de-activate for 1 minute, host=%s, ex=%s", host, SolBase.extostr(e))
                 self.host_status[host] = time.time() + 60.0
                 # Kick connection
@@ -283,12 +283,13 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :rtype bool
         """
 
-        Meters.aii("k.db_pool_mysql.call._connection_ping")
+        Meters.aii("k.db_pool.mysql.call._connection_ping")
 
         # noinspection PyBroadException
         try:
             conn.ping(reconnect=False)
         except Exception as e:
+            Meters.aii("k.db_pool.mysql.ex_ping")
             logger.warning("Ping failed, obj=%s, ex=%s", conn, SolBase.extostr(e))
             return False
         else:
@@ -302,7 +303,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         :type conn: pymysql.connections.Connection
         """
 
-        Meters.aii("k.db_pool_mysql.call._connection_close")
+        Meters.aii("k.db_pool.mysql.call._connection_close")
 
         # noinspection PyBroadException
         try:
@@ -310,4 +311,5 @@ class MysqlConnectionPool(DatabaseConnectionPool):
                 conn.close()
         except Exception as e:
             # Dont care of exception in case of closing
+            Meters.aii("k.db_pool.mysql.ex_close")
             logger.debug("Close exception (non fatal), ex=%s", SolBase.extostr(e))
