@@ -24,6 +24,7 @@
 
 import logging
 from gevent import queue
+from gevent.threading import Lock
 from pysolmeters.Meters import Meters
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,9 @@ class DatabaseConnectionPool(object):
         :param conf_dict: dict
         :type conf_dict: dict
         """
+
+        # Lock for acquire/release
+        self.pool_lock = Lock()
 
         # Store
         self.conf_dict = conf_dict
@@ -60,33 +64,44 @@ class DatabaseConnectionPool(object):
         :rtype object
         """
 
-        Meters.aii("k.db_pool_base.call.connection_acquire")
+        with self.pool_lock:
 
-        if self.size >= self.max_size or self.pool.qsize():
-            # Get from the pool
-            conn = self.pool.get()
+            Meters.aii("k.db_pool_base.call.connection_acquire")
 
-            # Ping it
-            if not self._connection_ping(conn):
-                # Failed => close it
-                self._connection_close(conn)
+            if self.pool.qsize() > 0:
+                # ------------------------------
+                # GET CONNECTION FROM POOL
+                # ------------------------------
+                conn = self.pool.get()
 
-                # Re-create a new one (we just closed a connection)
-                conn = self._connection_create()
+                # Ping it
+                if not self._connection_ping(conn):
+                    # Failed => close it
+                    self._connection_close(conn)
 
-            # Send it back
-            return conn
-        else:
-            # New connection
-            self.size += 1
-            Meters.aii("k.db_pool_base.cur_size", increment_value=1)
-            try:
-                conn = self._connection_create()
-            except Exception:
-                self.size -= 1
-                Meters.aii("k.db_pool_base.cur_size", increment_value=-1)
-                raise
-            return conn
+                    # Re-create a new one (we just closed a connection)
+                    conn = self._connection_create()
+
+                # Send it back
+                return conn
+            elif self.size >= self.max_size:
+                # ------------------------------
+                # POOL MAXED => ERROR
+                # ------------------------------
+                Meters.aii("k.db_pool_base.pool_maxed")
+                raise Exception("Pool maxed")
+            else:
+                # ------------------------------
+                # POOL NOT MAXED, NO CONNECTION IN POOL => NEW CONNECTION
+                # ------------------------------
+                try:
+                    conn = self._connection_create()
+                    self.size += 1
+                    Meters.aii("k.db_pool_base.cur_size", increment_value=1)
+                    Meters.ai("k.db_pool_base.max_size").set(max(Meters.aig("k.db_pool_base.max_size"), Meters.aig("k.db_pool_base.cur_size")))
+                except Exception:
+                    raise
+                return conn
 
     def connection_release(self, conn):
         """
@@ -95,20 +110,20 @@ class DatabaseConnectionPool(object):
         :type conn: object
         """
 
-        Meters.aii("k.db_pool_base.call.connection_release")
+        with self.pool_lock:
 
-        # If none, decrement + return
-        if conn is None:
-            Meters.aii("k.db_pool_base.cur_size", increment_value=-1)
-            self.size -= 1
-            return
+            Meters.aii("k.db_pool_base.call.connection_release")
 
-        # Put it back
-        try:
-            self.pool.put(conn, timeout=2)
-        except queue.Full:
-            # If full, close it
-            self._connection_close(conn)
+            # If none, decrement + return
+            if conn is None:
+                return
+
+            # Put it back
+            try:
+                self.pool.put(conn)
+            except queue.Full:
+                # If full, close it
+                self._connection_close(conn)
 
     def close_all(self):
         """
@@ -121,6 +136,7 @@ class DatabaseConnectionPool(object):
             n += 1
 
         Meters.aii("k.db_pool_base.cur_size", increment_value=-n)
+        Meters.ai("k.db_pool_base.max_size").set(max(Meters.aig("k.db_pool_base.max_size"), Meters.aig("k.db_pool_base.cur_size")))
         self.size = 0
 
     # ------------------------------------------------

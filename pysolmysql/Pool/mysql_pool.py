@@ -237,6 +237,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
             # Check it
             if not host:
+                Meters.aii("k.db_pool_mysql.hosts.all_down")
                 raise Exception("No mysql host available, %s are down" % self.host_status.keys())
 
             # This host seems up => try open a connection
@@ -258,6 +259,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
                 # - We disable the host for ALL errors (even if DatabaseError can be raised when database do not exists but when the server is up...)
 
                 # Deactivate host
+                Meters.aii("k.db_pool_mysql.hosts.deactivate_one")
                 logger.error("Host de-activate for 1 minute, host=%s, ex=%s", host, SolBase.extostr(e))
                 self.host_status[host] = time.time() + 60.0
                 # Kick connection
