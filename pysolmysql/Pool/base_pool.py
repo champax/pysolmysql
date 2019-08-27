@@ -89,7 +89,7 @@ class DatabaseConnectionPool(object):
                 # POOL MAXED => ERROR
                 # ------------------------------
                 Meters.aii("k.db_pool.base.pool_maxed")
-                raise Exception("Pool maxed")
+                raise Exception("Pool maxed, size=%s, max_size=%s" % (self.size, self.max_size))
             else:
                 # ------------------------------
                 # POOL NOT MAXED, NO CONNECTION IN POOL => NEW CONNECTION

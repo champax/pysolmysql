@@ -25,3 +25,10 @@
 # This is forked and updated from : https://github.com/laurentL/django-mysql-geventpool-27
 
 # Which was forked : https://github.com/shunsukeaihara/django-mysql-geventpool
+
+# NOTE :
+# we do not close connection or timeout them, we assume underlying backend (mariadb) will close inactive connections on its end
+
+# TODO : handle initial connection opening (for warm-up the pool when allocating)
+# TODO : handle connection_acquire with timeout (in case pool is full - currently we raise immediatly)
+# TODO : handle better locking in connection_acquire (global lock currently)

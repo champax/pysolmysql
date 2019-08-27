@@ -42,7 +42,11 @@ random.seed(a=struct.unpack('i', os.urandom(4)))
 
 class MysqlConnectionPool(DatabaseConnectionPool):
     """
-    Mysql connection pool
+    Mysql connection pool, gevent compliant.
+
+    This support multiple target hosts.
+
+    In multiple target hosts mode, this is intended to be used with a mariadb active/active galera cluster.
     """
 
     # Public sample config dict
