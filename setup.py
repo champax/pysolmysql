@@ -68,7 +68,7 @@ p_name = "pysolmysql"
 p_author = "Laurent Champagnac"
 p_email = "champagnac.laurent@gmail.com"
 p_url = "https://knock.center"
-p_version = "1.1.5"
+p_version = "1.1.6"
 
 # Load
 req_list, dep_list = requirement_read("requirements.txt")
