@@ -297,7 +297,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
             conn.ping(reconnect=False)
         except Exception as e:
             Meters.aii("k.db_pool.mysql.ex_ping")
-            logger.warning("Ping failed, obj=%s, ex=%s", conn, SolBase.extostr(e))
+            logger.debug("Ping failed, obj=%s, ex=%s", conn, SolBase.extostr(e))
             return False
         else:
             return True
