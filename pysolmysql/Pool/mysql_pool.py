@@ -99,16 +99,19 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         self.host_status = dict()
 
         # Check
-        if "hosts" not in self.conf_dict and "host" not in self.conf_dict:
-            raise Exception("No host specified")
+        if "hosts" not in self.conf_dict and "host" not in self.conf_dict and "unix" not in self.conf_dict:
+            raise Exception("No server specified (hosts, host, unix not found in conf_dict")
 
         # Init, "hosts" first
         if "hosts" in self.conf_dict:
             for host in self.conf_dict["hosts"]:
                 self.host_status[host] = 0.0
-        else:
+        elif "host" in self.conf_dict:
             logger.warning("Using deprecated entry, prefer using 'hosts', got host=%s", self.conf_dict["host"])
             for host in self.conf_dict["host"].split(","):
+                self.host_status[host] = 0.0
+        elif "unix" in self.conf_dict:
+            for host in self.conf_dict["unix"].split(","):
                 self.host_status[host] = 0.0
 
     # ------------------------------------------------
