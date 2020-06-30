@@ -294,6 +294,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
         # noinspection PyBroadException
         try:
+            # TODO : PING MODE MUST BE CONFIGURABLE
             conn.ping(reconnect=False)
         except Exception as e:
             Meters.aii("k.db_pool.mysql.ex_ping")
