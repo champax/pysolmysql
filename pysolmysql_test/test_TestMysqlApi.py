@@ -291,7 +291,8 @@ class TestMysqlApi(unittest.TestCase):
         # exec_0
         d = MysqlApi.exec_0(d_conf, "SELECT user, host FROM mysql.user;")
         logger.info("d=%s", d)
-        self.assertGreater(1)
+        self.assertIsInstance(d, int)
+        self.assertGreaterEqual(d, 1)
 
         # multi_n
         d = MysqlApi.multi_n(d_conf, ["SELECT DISTINCT(user) FROM mysql.user;", "SELECT DISTINCT(host) FROM mysql.user;"])

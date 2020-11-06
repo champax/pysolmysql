@@ -109,7 +109,7 @@ class MysqlApi(object):
     @classmethod
     def exec_0(cls, conf_dict, statement):
         """
-        Execute a sql statement, returning nothing.
+        Execute a sql statement, returning row affected.
         :param conf_dict: configuration dict
         :type conf_dict: dict
         :param statement: statement to execute
