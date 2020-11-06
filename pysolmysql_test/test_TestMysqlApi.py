@@ -191,6 +191,14 @@ class TestMysqlApi(unittest.TestCase):
             # noinspection PyUnresolvedReferences
             self.assertEqual(v, d['string'])
 
+        d = MysqlApi.exec_0(d_conf, "update ut_t1 set string = 'none' where string='tamer';")
+        logger.info("d=%s", d)
+        self.assertEqual(d, 1)
+
+        d = MysqlApi.exec_0(d_conf, "update ut_t1 set string = 'none' where string='samer';")
+        logger.info("d=%s", d)
+        self.assertEqual(d, 0)
+
     def test_mysql_api(self):
         """
         Test
@@ -283,7 +291,7 @@ class TestMysqlApi(unittest.TestCase):
         # exec_0
         d = MysqlApi.exec_0(d_conf, "SELECT user, host FROM mysql.user;")
         logger.info("d=%s", d)
-        self.assertIsNone(d)
+        self.assertGreater(1)
 
         # multi_n
         d = MysqlApi.multi_n(d_conf, ["SELECT DISTINCT(user) FROM mysql.user;", "SELECT DISTINCT(host) FROM mysql.user;"])
