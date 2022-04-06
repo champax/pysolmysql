@@ -119,15 +119,13 @@ class MysqlApi(object):
         """
 
         cnx = None
-        rows_affected = 0
         try:
             cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 cur.execute(statement)
-                rows_affected = cur.rowcount
+                return cur.rowcount
         finally:
             cls._get_pool(conf_dict).connection_release(cnx)
-            return rows_affected
 
     @classmethod
     def exec_n(cls, conf_dict, statement, fix_types=True):
