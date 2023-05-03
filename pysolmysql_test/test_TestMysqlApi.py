@@ -191,6 +191,14 @@ class TestMysqlApi(unittest.TestCase):
             # noinspection PyUnresolvedReferences
             self.assertEqual(v, d['string'])
 
+        d = MysqlApi.exec_0(d_conf, "update ut_t1 set string = 'none' where string='tamer';")
+        logger.info("d=%s", d)
+        self.assertIsNone(d)
+
+        d = MysqlApi.exec_0(d_conf, "update ut_t1 set string = 'none' where string='samer';")
+        logger.info("d=%s", d)
+        self.assertIsNone(d)
+
     def test_mysql_api(self):
         """
         Test

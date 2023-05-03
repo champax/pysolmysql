@@ -37,7 +37,7 @@ from pysolmysql.Pool.base_pool import DatabaseConnectionPool
 logger = logging.getLogger(__name__)
 
 # Init random
-random.seed(a=struct.unpack('i', os.urandom(4)))
+random.seed()
 
 
 class MysqlConnectionPool(DatabaseConnectionPool):
