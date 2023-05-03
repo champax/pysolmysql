@@ -135,7 +135,7 @@ class TestMysqlApi(unittest.TestCase):
         }
 
         # exec_1
-        d = MysqlApi.exec_1(d_conf, "SELECT user, host FROM user LIMIT 1;")
+        d = MysqlApi.exec_1(d_conf, "SELECT user as user, host as host FROM user LIMIT 1;")
         logger.info("d=%s", d)
         self.assertIsInstance(d, dict)
         self.assertIn("user", d)
@@ -144,7 +144,7 @@ class TestMysqlApi(unittest.TestCase):
         # exec_1 (must fail, bad db)
         d_conf["database"] = "zzz"
         try:
-            MysqlApi.exec_1(d_conf, "SELECT user, host FROM user LIMIT 1;")
+            MysqlApi.exec_1(d_conf, "SELECT user as user, host as host FROM user LIMIT 1;")
             self.fail("Must fail, bad db")
         except Exception:
             pass
@@ -152,7 +152,7 @@ class TestMysqlApi(unittest.TestCase):
         # exec_1 (must fail, bad db even with explicit)
         d_conf["database"] = "zzz"
         try:
-            MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
+            MysqlApi.exec_1(d_conf, "SELECT user as user, host as host FROM mysql.user LIMIT 1;")
             self.fail("Must fail, bad db with explicit")
         except Exception:
             pass
@@ -183,7 +183,7 @@ class TestMysqlApi(unittest.TestCase):
         d = MysqlApi.exec_n(d_conf, table_statement)
         logger.info("d=%s", d)
 
-        for v in ['tamer', u'string_utf8_Ř']:
+        for v in ['tamer', u'string_utf8_Ř', 'a', 'b', 'c']:
             d = MysqlApi.exec_0(d_conf, "INSERT INTO ut_t1 set string = '%s'" % v)
             logger.info("d=%s", d)
             d = MysqlApi.exec_1(d_conf, """select * from ut_t1 where string = '%s'""" % v, fix_types=True)
@@ -193,11 +193,31 @@ class TestMysqlApi(unittest.TestCase):
 
         d = MysqlApi.exec_0(d_conf, "update ut_t1 set string = 'none' where string='tamer';")
         logger.info("d=%s", d)
-        self.assertIsNone(d)
+        self.assertEqual(d, 1)
 
         d = MysqlApi.exec_0(d_conf, "update ut_t1 set string = 'none' where string='samer';")
         logger.info("d=%s", d)
-        self.assertIsNone(d)
+        self.assertEqual(d, 0)
+
+        d = MysqlApi.exec_0(d_conf, "delete from ut_t1 where string='none';")
+        logger.info("d=%s", d)
+        self.assertEqual(d, 1)
+
+        d = MysqlApi.exec_0(d_conf, "delete from ut_t1 where string='none';")
+        logger.info("d=%s", d)
+        self.assertEqual(d, 0)
+
+        d = MysqlApi.exec_n(d_conf, "select * from ut_t1;")
+        logger.info("d=%s", d)
+        self.assertEqual(len(d), 4)
+
+        d = MysqlApi.exec_0(d_conf, "delete from ut_t1 where string in ('a', 'b');")
+        logger.info("d=%s", d)
+        self.assertEqual(d, 2)
+
+        d = MysqlApi.exec_n(d_conf, "select * from ut_t1;")
+        logger.info("d=%s", d)
+        self.assertEqual(len(d), 2)
 
     def test_mysql_api(self):
         """

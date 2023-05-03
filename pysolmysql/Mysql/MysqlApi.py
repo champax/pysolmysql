@@ -109,11 +109,13 @@ class MysqlApi(object):
     @classmethod
     def exec_0(cls, conf_dict, statement):
         """
-        Execute a sql statement, returning nothing.
+        Execute a sql statement, returning row affected.
         :param conf_dict: configuration dict
         :type conf_dict: dict
         :param statement: statement to execute
         :type statement: str
+        :rtype: int
+        :return rows affected
         """
 
         cnx = None
@@ -121,6 +123,7 @@ class MysqlApi(object):
             cnx = cls._get_pool(conf_dict).connection_acquire()
             with closing(cnx.cursor()) as cur:
                 cur.execute(statement)
+                return cur.rowcount
         finally:
             cls._get_pool(conf_dict).connection_release(cnx)
 

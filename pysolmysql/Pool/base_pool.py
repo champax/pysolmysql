@@ -60,6 +60,8 @@ class DatabaseConnectionPool(object):
     def connection_acquire(self):
         """
         Get a connection
+        # TODO : In case client cannot release (greenlet kill) : add a spawn_later to protect pull exhaust (+ kill the connection in this case)
+        # TODO : this requires a timeout by config (lets say 60 sec by default)
         :return: object
         :rtype object
         """
