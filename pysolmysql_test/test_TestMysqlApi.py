@@ -245,13 +245,13 @@ class TestMysqlApi(unittest.TestCase):
             self.assertIn("Variable_name", d)
 
         # exec_n, no return (should be ok)
-        ar = MysqlApi.exec_n(d_conf, "SELECT user, host FROM mysql.user WHERE user='zzz';")
+        ar = MysqlApi.exec_n(d_conf, "SELECT user as user, host as host FROM mysql.user WHERE user='zzz';")
         logger.info("ar=%s", ar)
         self.assertIsInstance(ar, tuple)
         self.assertEqual(len(ar), 0)
 
         # exec_n
-        ar = MysqlApi.exec_n(d_conf, "SELECT user, host FROM mysql.user;")
+        ar = MysqlApi.exec_n(d_conf, "SELECT user as user, host as host FROM mysql.user;")
         logger.info("ar=%s", ar)
         self.assertIsInstance(ar, list)
         for d in ar:
@@ -260,7 +260,7 @@ class TestMysqlApi(unittest.TestCase):
             self.assertIn("host", d)
 
         # exec_n, one record
-        ar = MysqlApi.exec_n(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
+        ar = MysqlApi.exec_n(d_conf, "SELECT user as user, host as host FROM mysql.user LIMIT 1;")
         logger.info("ar=%s", ar)
         self.assertIsInstance(ar, list)
         for d in ar:
@@ -269,7 +269,7 @@ class TestMysqlApi(unittest.TestCase):
             self.assertIn("host", d)
 
         # exec_1
-        d = MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
+        d = MysqlApi.exec_1(d_conf, "SELECT user as user, host as host FROM mysql.user LIMIT 1;")
         logger.info("d=%s", d)
         self.assertIsInstance(d, dict)
         self.assertIn("user", d)
@@ -277,20 +277,20 @@ class TestMysqlApi(unittest.TestCase):
 
         # exec_1, 2 records (must fail)
         try:
-            MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user LIMIT 2;")
+            MysqlApi.exec_1(d_conf, "SELECT user as user, host as host FROM mysql.user LIMIT 2;")
             self.fail("Must raise")
         except Exception:
             pass
 
         # exec_1, 0 records (must fail)
         try:
-            MysqlApi.exec_1(d_conf, "SELECT user, host FROM mysql.user WHERE user='zzz';")
+            MysqlApi.exec_1(d_conf, "SELECT user as user, host as host FROM mysql.user WHERE user='zzz';")
             self.fail("Must raise")
         except Exception:
             pass
 
         # exec_01
-        d = MysqlApi.exec_01(d_conf, "SELECT user, host FROM mysql.user LIMIT 1;")
+        d = MysqlApi.exec_01(d_conf, "SELECT user as user, host as host FROM mysql.user LIMIT 1;")
         logger.info("d=%s", d)
         self.assertIsInstance(d, dict)
         self.assertIn("user", d)
@@ -298,20 +298,20 @@ class TestMysqlApi(unittest.TestCase):
 
         # exec_01, 2 records (must fail)
         try:
-            MysqlApi.exec_01(d_conf, "SELECT user, host FROM mysql.user LIMIT 2;")
+            MysqlApi.exec_01(d_conf, "SELECT user as user, host as host FROM mysql.user LIMIT 2;")
             self.fail("Must raise")
         except Exception:
             pass
 
         # exec_01, 0 records (must be ok)
-        d = MysqlApi.exec_01(d_conf, "SELECT user, host FROM mysql.user WHERE user='zzz';")
+        d = MysqlApi.exec_01(d_conf, "SELECT user as user, host as host FROM mysql.user WHERE user='zzz';")
         logger.info("d=%s", d)
         self.assertIsNone(d)
 
         # exec_0
-        d = MysqlApi.exec_0(d_conf, "SELECT user, host FROM mysql.user;")
+        d = MysqlApi.exec_0(d_conf, "SELECT user as user, host as host FROM mysql.user;")
         logger.info("d=%s", d)
-        self.assertIsNone(d)
+        self.assertIsInstance(d, int)
 
         # multi_n
         d = MysqlApi.multi_n(d_conf, ["SELECT DISTINCT(user) FROM mysql.user;", "SELECT DISTINCT(host) FROM mysql.user;"])
