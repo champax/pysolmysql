@@ -23,12 +23,11 @@
 """
 import copy
 import logging
-import os
 import random
-import struct
 
 import pymysql
 import time
+from pymysql.cursors import DictCursor
 from pysolbase.SolBase import SolBase
 from pysolmeters.Meters import Meters
 
@@ -167,7 +166,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
                 charset=conf_dict.get("encoding", "utf8"),
 
-                cursorclass=pymysql.cursors.DictCursor
+                cursorclass=DictCursor
             )
             return c
 
@@ -192,7 +191,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
 
                 autocommit=conf_dict["autocommit"],
 
-                cursorclass=pymysql.cursors.DictCursor
+                cursorclass=DictCursor
             )
             return c
 
