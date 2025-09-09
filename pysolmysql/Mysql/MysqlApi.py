@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ===============================================================================
 #
-# Copyright (C) 2013/2017 Laurent Labatut / Laurent Champagnac
+# Copyright (C) 2013/2025 Laurent Labatut / Laurent Champagnac
 #
 #
 #
@@ -27,7 +27,7 @@ import ujson
 import logging
 from contextlib import closing
 
-from gevent.threading import Lock
+from threading import Lock
 from pysolmeters.Meters import Meters
 
 from pysolmysql.Pool.mysql_pool import MysqlConnectionPool

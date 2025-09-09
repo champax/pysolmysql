@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ===============================================================================
 #
-# Copyright (C) 2013/2017 Laurent Labatut / Laurent Champagnac
+# Copyright (C) 2013/2025 Laurent Labatut / Laurent Champagnac
 #
 #
 #
@@ -262,7 +262,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
                     raise Exception("Connection ping failed")
             except Exception as e:
                 # NOTE :
-                # - We disable the host for ALL errors (even if DatabaseError can be raised when database do not exists but when the server is up...)
+                # - We disable the host for ALL errors (even if DatabaseError can be raised when database do not exist but when the server is up...)
 
                 # Deactivate host
                 Meters.aii("k.db_pool.mysql.hosts.deactivate_one")
@@ -281,7 +281,7 @@ class MysqlConnectionPool(DatabaseConnectionPool):
         """
         Ping connection
 
-        This send a ping, write/read toward mysql.
+        This sends a ping, write/read toward mysql.
 
         :param conn: pymysql.connections.Connection
         :type conn: pymysql.connections.Connection
@@ -317,6 +317,6 @@ class MysqlConnectionPool(DatabaseConnectionPool):
             if conn:
                 conn.close()
         except Exception as e:
-            # Dont care of exception in case of closing
+            # Don't care of exception in case of closing
             Meters.aii("k.db_pool.mysql.ex_close")
             logger.debug("Close exception (non fatal), ex=%s", SolBase.extostr(e))
