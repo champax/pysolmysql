@@ -32,7 +32,7 @@ p_name = "pysolmysql"
 p_author = "Laurent Champagnac"
 p_email = "champagnac.laurent@gmail.com"
 p_url = "https://github.com/champax/pysolmysql"
-p_version = "3.13.2"
+p_version = "3.13.3"
 
 setup(
 
